@@ -9,12 +9,14 @@ resource "kubernetes_deployment" "nginx" {
 
   spec {
     selector {
-      app = "nginx"
+       match_labels ={
+           app = "nginx"
+    }
     }
 
     template {
       metadata {
-        labels {
+        labels = {
           app = "nginx"
         }
       }
@@ -71,7 +73,7 @@ resource "kubernetes_service" "example" {
   }
 
   spec {
-    selector {
+    selector = {
       app = "nginx"
     }
 

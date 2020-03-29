@@ -6,11 +6,11 @@ resource "helm_release" "mongo" {
 
   set {
     name  = "auth.adminUser"
-    value = "foo"
+    value = "lidor"
   }
 
   set {
     name  = "auth.adminPassword"
-    value = "asdfgh"
+    value = "a1a1a1"
   }
 }

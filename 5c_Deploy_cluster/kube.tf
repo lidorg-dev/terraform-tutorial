@@ -1,9 +1,9 @@
 module "kubernetes" {
   source = "./kubernetes"
-  region = "us-east1"
+  region = "us-central1"
 
   project_id_map = {
-    default = "stefan-terraform-demo"
+    default = "norse-antenna-244412"
   }
 }
 

@@ -1,13 +1,13 @@
 data "google_compute_zones" "available" {}
 
 data "google_container_engine_versions" "available" {
-  zone = "${local.primary_zone}"
+  location = "${local.primary_zone}"
 }
 
 locals {
   default_name = "${var.project_id_map[terraform.workspace]}-cluster"
   name         = "${local.default_name}"
-  primary_zone = "${data.google_compute_zones.available.names[0]}"
+  primary_zone = "us-central1-a"
   project      = "${var.project_id_map[terraform.workspace]}"
 
   pre_calc_additional_zones = [
@@ -15,11 +15,11 @@ locals {
     "${data.google_compute_zones.available.names[2]}",
   ]
 
-  additional_zones = "${compact(local.pre_calc_additional_zones)}"
+  node_locations = "${compact(local.pre_calc_additional_zones)}"
 }
 
 resource "null_resource" "start" {
-  triggers {
+  triggers = {
     depends_id = "${var.dependency_id}"
   }
 }
@@ -27,13 +27,12 @@ resource "null_resource" "start" {
 resource "google_container_cluster" "primary" {
   name               = "${local.name}"
   project            = "${local.project}"
-  zone               = "${local.primary_zone}"
+  location           = "${local.primary_zone}"
   node_version       = "${var.node_version}"
   min_master_version = "${var.node_version}"
   description        = "Kubernetes cluster"
 
-  additional_zones = ["${local.additional_zones}"]
-
+  node_locations = ["us-central1-b", "us-central1-c"]
   lifecycle {
     ignore_changes = ["node_pool"]
   }
@@ -48,16 +47,16 @@ resource "google_container_cluster" "primary" {
 
 resource "google_container_node_pool" "default" {
   name               = "${local.name}-pool"
-  zone               = "${local.primary_zone}"
+  location           = "${local.primary_zone}"
   cluster            = "${google_container_cluster.primary.name}"
   initial_node_count = 1
 
-  management = {
-    auto_repair  = true
-    auto_upgrade = false
-  }
+#  management = {
+#    auto_repair  = true
+#    auto_upgrade = false
+#  }
 
-  autoscaling = {
+  autoscaling  {
     min_node_count = 1
     max_node_count = 10
   }
